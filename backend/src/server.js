@@ -2,6 +2,7 @@ import express from "express";
 import router from "./routes/notesRoutes.js";
 import { connectDB } from "./config/db.js";
 import dotevn from "dotenv";
+import rateLimiter from "./middleware/rateLimiter.js";
 
 dotevn.config();
 connectDB();
@@ -9,6 +10,7 @@ connectDB();
 const app = express();
 
 app.use(express.json());
+app.use(rateLimiter);
 app.use("/api/notes", router);
 
 const PORT = process.env.PORT || 5000;
