@@ -5,7 +5,6 @@ import dotevn from "dotenv";
 import rateLimiter from "./middleware/rateLimiter.js";
 
 dotevn.config();
-connectDB();
 
 const app = express();
 
@@ -15,6 +14,10 @@ app.use("/api/notes", router);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server started on port: ${PORT}`);
-});
+connectDB()
+  .then(
+    app.listen(PORT, () => {
+      console.log(`Server started on port: ${PORT}`);
+    })
+  )
+  .catch((err) => console.error("Unable to start app: ", err));
