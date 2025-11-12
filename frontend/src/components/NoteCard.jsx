@@ -1,6 +1,6 @@
-import React from "react";
 import { useNavigate } from "react-router";
 import { FilePenLine, Trash2 } from "lucide-react";
+import { formateDate } from "../lib/utils";
 
 const NoteCard = ({ note, onDelete }) => {
   const navigate = useNavigate();
@@ -39,11 +39,7 @@ const NoteCard = ({ note, onDelete }) => {
 
           <div className="card-actions justify-between items-center mt-4">
             <span className="text-xs text-base-content/60">
-              {new Date(note.createdAt).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+              {formateDate(note.createdAt)}
             </span>
 
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">

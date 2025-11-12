@@ -2,24 +2,43 @@ import { Link } from "react-router";
 import Navbar from "../components/Navbar";
 import RateLimitUI from "../components/RateLimitUI";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../lib/api-client";
 import toast from "react-hot-toast";
-import { Signal } from "lucide-react";
 import LoadingUI from "../components/LoadingUI";
 import NoteCard from "../components/NoteCard";
+import { TOO_MANY_REQUESTS } from "../lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import EmptyNotes from "../components/EmptyNotes";
 
 const HomePage = () => {
-  const TOO_MANY_REQUESTS = 429;
   const [isRateLimit, setRateLimit] = useState(false);
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/notes")
+  const handleDelete = (id) => {
+    if (!window.confirm("Are you sure you want to delete this note?")) return;
+    api
+      .delete(`/notes/${id}`)
+      .then(() => {
+        toast.success("Note deleted successfully");
+        setNotes((prevNotes) => prevNotes.filter((note) => note._id !== id));
+      })
+      .catch((err) => {
+        if (err.response.status === TOO_MANY_REQUESTS) {
+          toast.error("Slow down! You're deleting too fast", {
+            duration: 4000,
+            icon: "😒",
+          });
+        } else toast.error("Failed to delete note");
+      });
+  };
+
+  const fetchNotes = () =>
+    api
+      .get("/notes")
       .then((res) => setNotes(res.data))
-      .then(setRateLimit(false))
+      .then(() => setRateLimit(false))
       .catch((err) => {
         console.error("Error fetching notes");
         if (err.response.status === TOO_MANY_REQUESTS) {
@@ -28,26 +47,38 @@ const HomePage = () => {
           toast.error("Failed to load notes");
         }
       })
-      .finally(setLoading(false));
-  }, []);
+      .finally(() => setLoading(false));
 
-  console.log(notes);
+  useEffect(() => {
+    fetchNotes();
+  }, []);
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      {isRateLimit && <RateLimitUI></RateLimitUI>}
-      {loading && <LoadingUI />}
-      {notes.length > 0 && !isRateLimit && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-10">
-          {notes.map((note) => (
-            <NoteCard
-              key={note._id}
-              note={note}
-              onDelete={(id) => console.log("Delete note: ", id)}
-            />
-          ))}
+      {loading ? (
+        <LoadingUI />
+      ) : isRateLimit ? (
+        <RateLimitUI />
+      ) : notes.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-10 mt-3">
+          <AnimatePresence>
+            {notes.map((note) => (
+              <motion.div
+                key={note._id}
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25 }}
+              >
+                <NoteCard note={note} onDelete={handleDelete} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
+      ) : (
+        <EmptyNotes />
       )}
     </div>
   );

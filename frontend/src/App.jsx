@@ -2,7 +2,6 @@ import { Route, Routes } from "react-router";
 import HomePage from "./pages/HomePage";
 import CreatePage from "./pages/CreatePage";
 import NoteDetailPage from "./pages/NoteDetailPage";
-import toast from "react-hot-toast";
 
 const App = () => {
   return (
@@ -12,6 +11,10 @@ const App = () => {
         <Route path="/create" element={<CreatePage />} />
         <Route path="/note/:id" element={<NoteDetailPage />} />
       </Routes>
+
+      <footer className="py-4 text-center text-sm text-base-content/60 border-t border-base-content/10">
+        © {new Date().getFullYear()} Otis Opoku. All rights reserved.
+      </footer>
     </div>
   );
 };
