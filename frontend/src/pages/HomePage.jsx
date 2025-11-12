@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import Navbar from "../components/Navbar";
 import RateLimitUI from "../components/RateLimitUI";
 import { useEffect, useState } from "react";
@@ -9,6 +8,7 @@ import NoteCard from "../components/NoteCard";
 import { TOO_MANY_REQUESTS } from "../lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import EmptyNotes from "../components/EmptyNotes";
+import ErrorUI from "../components/ErrorUI";
 
 const HomePage = () => {
   const [isRateLimit, setRateLimit] = useState(false);
@@ -34,7 +34,9 @@ const HomePage = () => {
       });
   };
 
-  const fetchNotes = () =>
+  const fetchNotes = () => {
+    setLoading(true);
+    setError(false);
     api
       .get("/notes")
       .then((res) => setNotes(res.data))
@@ -45,9 +47,11 @@ const HomePage = () => {
           setRateLimit(true);
         } else {
           toast.error("Failed to load notes");
+          setError(true);
         }
       })
       .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
     fetchNotes();
@@ -58,6 +62,8 @@ const HomePage = () => {
       <Navbar />
       {loading ? (
         <LoadingUI />
+      ) : error ? (
+        <ErrorUI onRetry={fetchNotes} />
       ) : isRateLimit ? (
         <RateLimitUI />
       ) : notes.length > 0 ? (
