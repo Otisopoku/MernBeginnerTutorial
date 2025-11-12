@@ -11,7 +11,7 @@ const NoteCard = ({ note, onDelete }) => {
 
   const handleEditClick = (e) => {
     e.stopPropagation();
-    navigate(`/note/edit/${note._id}`);
+    navigate(`/note/${note._id}`);
   };
 
   const handleDeleteClick = (e) => {
