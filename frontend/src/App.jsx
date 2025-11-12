@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 const App = () => {
   return (
-    <div data-theme="coffee">
+    <div data-theme="coffee" className="overflow-y-hidden">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/create" element={<CreatePage />} />
